@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.fft import fft, ifft
+
+# Configuration
+sampling_frequency = 1000  # Sampling frequency (Hz)
+time = np.linspace(0, 1, sampling_frequency, endpoint=False)  # 1 second time vector
+signal_frequency = 50  # Signal frequency (Hz)
+
+# Generate a Signal (Sine Wave + Noise)
+signal = np.sin(2 * np.pi * signal_frequency * time)  # Base sine wave
+noise = np.random.randn(len(time)) * 0.5  # Add Gaussian noise
+noisy_signal = signal + noise  # Noisy signal
+
+# Apply FFT (Fourier Transform) to transform the signal into the frequency domain
+signal_fft = fft(noisy_signal)
+frequencies = np.fft.fftfreq(len(time), 1/sampling_frequency)  # Frequency vector
+
+# Low Pass Filter (Retains frequencies below a cutoff)
+low_cutoff = 100  # Cutoff frequency (Hz)
+low_pass_filter = np.abs(frequencies) < low_cutoff
+filtered_signal_lpf = ifft(signal_fft * low_pass_filter)
+
+# High Pass Filter (Retains frequencies above a cutoff)
+high_cutoff = 10  # Cutoff frequency (Hz)
+high_pass_filter = np.abs(frequencies) > high_cutoff
+filtered_signal_hpf = ifft(signal_fft * high_pass_filter)
+
+# Band Pass Filter (Retains frequencies between two cutoffs)
+band_cutoff_low = 30  # Low cutoff frequency (Hz)
+band_cutoff_high = 70  # High cutoff frequency (Hz)
+band_pass_filter = (np.abs(frequencies) > band_cutoff_low) & (np.abs(frequencies) < band_cutoff_high)
+filtered_signal_bpf = ifft(signal_fft * band_pass_filter)
+
+# Band Reject Filter (Eliminates frequencies within a specific range)
+band_reject_cutoff_low = 40  # Low cutoff frequency (Hz)
+band_reject_cutoff_high = 60  # High cutoff frequency (Hz)
+band_reject_filter = ~((np.abs(frequencies) > band_reject_cutoff_low) & 
+                       (np.abs(frequencies) < band_reject_cutoff_high))
+filtered_signal_brf = ifft(signal_fft * band_reject_filter)
+
+# Plotting the Results
+plt.figure(figsize=(12, 8))
+
+# Plot the Original and Noisy Signal
+plt.subplot(3, 2, 1)
+plt.plot(time, noisy_signal, label="Noisy Signal")
+plt.title("Noisy Signal")
+plt.legend()
+
+# Plot Low Pass Filtered Signal
+plt.subplot(3, 2, 2)
+plt.plot(time, filtered_signal_lpf.real, label="Low Pass Filtered Signal", color='green')
+plt.title("Low Pass Filtered Signal")
+plt.legend()
+
+# Plot High Pass Filtered Signal
+plt.subplot(3, 2, 3)
+plt.plot(time, filtered_signal_hpf.real, label="High Pass Filtered Signal", color='blue')
+plt.title("High Pass Filtered Signal")
+plt.legend()
+
+# Plot Band Pass Filtered Signal
+plt.subplot(3, 2, 4)
+plt.plot(time, filtered_signal_bpf.real, label="Band Pass Filtered Signal", color='orange')
+plt.title("Band Pass Filtered Signal")
+plt.legend()
+
+# Plot Band Reject Filtered Signal
+plt.subplot(3, 2, 5)
+plt.plot(time, filtered_signal_brf.real, label="Band Reject Filtered Signal", color='red')
+plt.title("Band Reject Filtered Signal")
+plt.legend()
+
+plt.tight_layout()
+plt.show()
