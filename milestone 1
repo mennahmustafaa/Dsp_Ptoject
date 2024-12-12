@@ -1,0 +1,101 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+fs = 1000  # Sampling frequency (Hz) for continuous signals
+t_cont = np.linspace(0, 1, 1000)  # Continuous time (1 second)
+t_disc = np.arange(0, 1, 1/fs)  # Discrete time (1 second)
+
+# 1. Generate and Plot Signals
+
+# Sinusoidal Wave
+freq = 5  # Frequency of sine wave (Hz)
+sinusoidal_cont = np.sin(2 * np.pi * freq * t_cont)
+sinusoidal_disc = np.sin(2 * np.pi * freq * t_disc)
+
+# Square Wave
+square_wave_cont = np.sign(np.sin(2 * np.pi * freq * t_cont))
+
+# Real-world Signals (example using random noise, as placeholder)
+real_world_signal = np.random.randn(len(t_cont))
+
+# Custom Equation (e.g., sum of two sinusoids)
+signal_custom = np.sin(2 * np.pi * 5 * t_cont) + 0.5 * np.sin(2 * np.pi * 15 * t_cont)
+
+# Plot the signals
+plt.figure(figsize=(12, 10))
+
+# Sinusoidal Wave
+plt.subplot(2, 2, 1)
+plt.plot(t_cont, sinusoidal_cont, label="Continuous")
+plt.stem(t_disc, sinusoidal_disc, 'r', label="Discrete", basefmt=" ")
+plt.title("Sinusoidal Wave")
+plt.legend()
+
+# Square Wave
+plt.subplot(2, 2, 2)
+plt.plot(t_cont, square_wave_cont, label="Square Wave")
+plt.title("Square Wave")
+
+# Real-world Signal
+plt.subplot(2, 2, 3)
+plt.plot(t_cont, real_world_signal, label="Real-world Signal (Noise)", color='orange')
+plt.title("Real-world Signal")
+
+# Custom Equation Signal
+plt.subplot(2, 2, 4)
+plt.plot(t_cont, signal_custom, label="Custom Equation")
+plt.title("Custom Signal (Sum of Sinusoids)")
+
+plt.tight_layout()
+plt.show()
+
+# 2. Sampling
+
+# Apply a sampling rate
+sampling_rate = 50  # Hz (lower than the signal frequency)
+t_sampled = np.arange(0, 1, 1/sampling_rate)
+
+# Sample the continuous sinusoidal signal
+sinusoidal_sampled = np.sin(2 * np.pi * freq * t_sampled)
+
+# Plot the original and sampled signals
+plt.figure(figsize=(10, 6))
+plt.plot(t_cont, sinusoidal_cont, label="Continuous Signal")
+plt.stem(t_sampled, sinusoidal_sampled, 'r', label="Sampled Signal", basefmt=" ")
+plt.title(f"Sampling at {sampling_rate} Hz")
+plt.legend()
+plt.show()
+
+# 3. Quantization
+
+# Quantize the sampled signal to 8 levels (e.g., 3-bit quantization)
+quantization_levels = 8
+quantized_signal = np.round(sinusoidal_sampled * (quantization_levels - 1)) / (quantization_levels - 1)
+
+# Plot the quantized signal
+plt.figure(figsize=(10, 6))
+plt.plot(t_sampled, sinusoidal_sampled, label="Sampled Signal")
+plt.stem(t_sampled, quantized_signal, 'g', label="Quantized Signal", basefmt=" ")
+plt.title(f"Quantization with {quantization_levels} Levels")
+plt.legend()
+plt.show()
+
+# 4. Aliasing (Demonstrating aliasing effect)
+
+# Simulating aliasing by using a higher-frequency sinusoidal signal
+freq_high = 200  # Higher frequency signal (for aliasing effect)
+sinusoidal_cont_high = np.sin(2 * np.pi * freq_high * t_cont)
+
+# Sampling at a much lower rate than the Nyquist rate
+sampling_rate_aliasing = 50  # Below Nyquist rate
+t_sampled_aliasing = np.arange(0, 1, 1/sampling_rate_aliasing)
+sinusoidal_sampled_aliasing = np.sin(2 * np.pi * freq_high * t_sampled_aliasing)
+
+# Plotting to show aliasing effect
+plt.figure(figsize=(10, 6))
+plt.plot(t_cont, sinusoidal_cont_high, label="Continuous Signal (High Frequency)")
+plt.stem(t_sampled_aliasing, sinusoidal_sampled_aliasing, 'r', label="Sampled Signal (Aliasing)", basefmt=" ")
+plt.title(f"Aliasing Effect with Sampling Rate {sampling_rate_aliasing} Hz")
+plt.legend()
+plt.show()
