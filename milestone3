@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import correlate, convolve
+
+# Configuration
+samplingFrequency = 1000  # Sampling frequency (Hz)
+time_cont = np.linspace(0, 1, 1000)  # Time vector for continuous signal
+time_disc = np.arange(0, 1, 1/samplingFrequency)  # Time vector for discrete signal
+
+# Signal Parameters
+frequency_signal = 5  # Frequency of the sinusoidal wave
+signal_amplitude = 1
+
+# Signal Generation (Sinusoidal)
+continuous_sine_wave = signal_amplitude * np.sin(2 * np.pi * frequency_signal * time_cont)
+discrete_sine_wave = signal_amplitude * np.sin(2 * np.pi * frequency_signal * time_disc)
+
+# Add Noise to the Signal
+noise_level = 0.5  # Noise amplitude
+noisy_continuous_signal = continuous_sine_wave + noise_level * np.random.randn(len(continuous_sine_wave))
+noisy_discrete_signal = discrete_sine_wave + noise_level * np.random.randn(len(discrete_sine_wave))
+
+# Smoothing using Moving Average (from Milestone 2)
+window_size = 20  # Number of samples in the moving average window
+smoothed_continuous_signal = np.convolve(noisy_continuous_signal, np.ones(window_size)/window_size, mode='same')
+smoothed_discrete_signal = np.convolve(noisy_discrete_signal, np.ones(window_size)/window_size, mode='same')
+
+# 1. **Convolution** (Combining the Smoothed Signals)
+# Convolution is used to combine two signals (e.g., simulating a system response to an input signal)
+convolved_signal_continuous = convolve(smoothed_continuous_signal, smoothed_continuous_signal, mode='same')
+convolved_signal_discrete = convolve(smoothed_discrete_signal, smoothed_discrete_signal, mode='same')
+
+# 2. **Correlation** (Measuring Similarity Between Two Signals)
+# Cross-correlation is used to find the similarity between two signals, indicating time shifts or matching patterns
+correlation_continuous = correlate(smoothed_continuous_signal, smoothed_continuous_signal, mode='same')
+correlation_discrete = correlate(smoothed_discrete_signal, smoothed_discrete_signal, mode='same')
+
+# Plotting the Results
+plt.figure(figsize=(12, 8))
+
+# Plot the Smoothed Signals
+plt.subplot(3, 2, 1)
+plt.plot(time_cont, smoothed_continuous_signal, label="Smoothed Continuous Signal", color='blue')
+plt.title("Smoothed Continuous Signal")
+plt.legend()
+
+plt.subplot(3, 2, 2)
+plt.stem(time_disc, smoothed_discrete_signal, label="Smoothed Discrete Signal", basefmt=" ", linefmt="blue")
+plt.title("Smoothed Discrete Signal")
+plt.legend()
+
+# Plot the Convolved Signals
+plt.subplot(3, 2, 3)
+plt.plot(time_cont, convolved_signal_continuous, label="Convolved Continuous Signal", color='green')
+plt.title("Convolved Continuous Signal")
+plt.legend()
+
+plt.subplot(3, 2, 4)
+plt.stem(time_disc, convolved_signal_discrete, label="Convolved Discrete Signal", basefmt=" ", linefmt="green")
+plt.title("Convolved Discrete Signal")
+plt.legend()
+
+# Plot the Correlation Results
+plt.subplot(3, 2, 5)
+plt.plot(time_cont, correlation_continuous, label="Correlation Continuous Signal", color='red')
+plt.title("Correlation of Continuous Signal")
+plt.legend()
+
+plt.subplot(3, 2, 6)
+plt.stem(time_disc, correlation_discrete, label="Correlation Discrete Signal", basefmt=" ", linefmt="red")
+plt.title("Correlation of Discrete Signal")
+plt.legend()
+
+plt.tight_layout()
+plt.show()
